@@ -4,7 +4,7 @@ from typing import List, Dict
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, F
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDate, TruncMonth, ExtractHour, ExtractWeekDay
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -135,3 +135,78 @@ def api_top_categories(request: HttpRequest) -> JsonResponse:
     )
     out = [{'category': row['category'], 'quantity': int(row['quantity'] or 0), 'revenue': float(row['revenue'] or 0)} for row in qs]
     return JsonResponse({'top': out})
+
+
+@require_GET
+@login_required
+def long_term(request: HttpRequest) -> HttpResponse:
+    return render(request, 'managers/long_term.html')
+
+
+@require_GET
+@login_required
+def api_monthly(request: HttpRequest) -> JsonResponse:
+    # Monthly revenue and orders across entire dataset
+    qs = (
+        OrderItem.objects
+        .annotate(month=TruncMonth('order__ordered_at'))
+        .values('month')
+        .annotate(revenue=Sum('total_price'), orders=Count('order', distinct=True))
+        .order_by('month')
+    )
+    out = [
+        {
+            'month': row['month'].date().isoformat(),
+            'revenue': float(row['revenue'] or 0),
+            'orders': int(row['orders'] or 0),
+        }
+        for row in qs
+    ]
+    return JsonResponse({'points': out})
+
+
+@require_GET
+@login_required
+def api_category_monthly(request: HttpRequest) -> JsonResponse:
+    # Monthly revenue by category for all time
+    qs = (
+        OrderItem.objects
+        .annotate(month=TruncMonth('order__ordered_at'))
+        .values('month', category=F('variant__pizza__category'))
+        .annotate(revenue=Sum('total_price'))
+        .order_by('month', 'category')
+    )
+    out = [
+        {
+            'month': row['month'].date().isoformat(),
+            'category': row['category'],
+            'revenue': float(row['revenue'] or 0),
+        }
+        for row in qs
+    ]
+    return JsonResponse({'rows': out})
+
+
+@require_GET
+@login_required
+def api_hourly_heatmap(request: HttpRequest) -> JsonResponse:
+    # Heatmap: orders by weekday (1=Sun..7=Sat in Django) and hour (0-23) across all data
+    qs = (
+        OrderItem.objects
+        .annotate(wd=ExtractWeekDay('order__ordered_at'), hr=ExtractHour('order__ordered_at'))
+        .values('wd', 'hr')
+        .annotate(orders=Count('order', distinct=True), revenue=Sum('total_price'))
+        .order_by('wd', 'hr')
+    )
+    rows = [
+        {
+            'weekday': int(row['wd'] or 0),
+            'hour': int(row['hr'] or 0),
+            'orders': int(row['orders'] or 0),
+            'revenue': float(row['revenue'] or 0),
+        }
+        for row in qs
+    ]
+    # Provide labels mapping starting Sunday
+    labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+    return JsonResponse({'rows': rows, 'weekday_labels': labels})
