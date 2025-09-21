@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Menu</h1>
+<p class="muted">Choose your pizza size and add to cart.</p>
+<div class="grid">
+  {% for pizza in pizzas %}
+  <div class="card">
+    <h3>{{ pizza.name }}</h3>
+    <div class="badges">
+      <span class="badge {{ pizza.category|lower }}">{{ pizza.category }}</span>
+    </div>
+    {% if pizza.ingredients %}<p class="muted">{{ pizza.ingredients }}</p>{% endif %}
+    <form method="post" action="{% url 'sales:add_to_cart' %}">
+      {% csrf_token %}
+      <label>Size:</label>
+      <select name="variant_id">
+        {% for v in pizza.variants.all %}
+          <option value="{{ v.id }}">{{ v.get_size_display }} — ${{ v.unit_price }}</option>
+        {% endfor %}
+      </select>
+      <label>Qty:</label>
+      <input type="number" name="quantity" min="1" value="1" style="width:64px" />
+      <button class="btn" type="submit">Add to cart</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

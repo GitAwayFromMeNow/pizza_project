@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h1>Kitchen Dashboard</h1>
+<p class="muted">Live orders for today. This page refreshes automatically.</p>
+<div id="orders" class="grid"></div>
+<script>
+  const API_LIST = '{% url "kitchen:api_open_orders" %}';
+  function getCookie(name){const v=document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');return v? v.pop():''}
+  const csrftoken = getCookie('csrftoken');
+
+  async function fetchOrders(){
+    try{
+      const res = await fetch(API_LIST, {headers:{'Accept':'application/json'}});
+      const data = await res.json();
+      renderOrders(data.orders || []);
+    }catch(e){ console.error(e); }
+  }
+
+  function orderCard(o){
+    const items = o.items.map(it=>`<li>${it.qty} × ${it.pizza} <small class="muted">(${it.size})</small></li>`).join('');
+    const cust = (o.customer && (o.customer.name||o.customer.phone||o.customer.address)) ? `
+      <div class="muted" style="margin-top:6px">
+        <div><strong>${o.customer.name||''}</strong> ${o.customer.phone? ' · '+o.customer.phone: ''}</div>
+        <div>${o.customer.address||''}</div>
+      </div>` : '';
+    const btn = o.status !== 'out_for_delivery' && o.status !== 'delivered' ? `
+      <button class="btn" onclick="sendOut(${o.id}, this)">Send for delivery</button>` :
+      `<span class="badge" style="background:rgba(64,196,99,.14)">Sent out</span>`;
+    return `
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <div><strong>#${o.external_id}</strong> · <small class="muted">${o.ordered_at}</small></div>
+          <div><span class="badge">${o.status.replaceAll('_',' ')}</span></div>
+        </div>
+        <ul style="margin:.5rem 0 .2rem;padding-left:18px">${items}</ul>
+        ${cust}
+        <div class="row" style="margin-top:10px;justify-content:flex-end">${btn}</div>
+      </div>`;
+  }
+
+  function renderOrders(list){
+    const el = document.getElementById('orders');
+    if(!list.length){ el.innerHTML = '<div class="card"><p class="muted">No open orders right now.</p></div>'; return; }
+    el.innerHTML = list.map(orderCard).join('');
+  }
+
+  async function sendOut(orderId, btn){
+    btn.disabled = true; btn.textContent = 'Sending...';
+    try{
+      const res = await fetch(`{% url 'kitchen:dashboard' %}api/orders/${orderId}/send/`, {
+        method:'POST',
+        headers:{'X-CSRFToken': csrftoken, 'Accept':'application/json'},
+      });
+      if(!res.ok){ throw new Error('Failed'); }
+      await fetchOrders();
+    }catch(e){ console.error(e); alert('Failed to update order'); }
+    finally{ btn.disabled = false; btn.textContent = 'Send for delivery'; }
+  }
+
+  fetchOrders();
+  setInterval(fetchOrders, 5000);
+</script>
+{% endblock %}

@@ -1,0 +1,116 @@
+/* Pizza Shop modern theme */
+:root{
+  --bg:#0f0f10;
+  --surface:#151618;
+  --card:#1c1e22;
+  --muted:#a7adba;
+  --text:#f3f5f7;
+  --accent:#ff4d4f; /* tomato red */
+  --accent-2:#ffc53d; /* cheese yellow */
+  --accent-3:#40c463; /* basil green */
+  --ring: rgba(255,77,79,.35);
+  --radius:14px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(18px 18px at 20% 15%, rgba(255,77,79,.18) 0 99%, transparent) 0 0/180px 180px,
+    radial-gradient(22px 22px at 70% 70%, rgba(255,197,61,.12) 0 99%, transparent) 0 0/220px 220px,
+    radial-gradient(16px 16px at 50% 40%, rgba(64,196,99,.10) 0 99%, transparent) 0 0/260px 260px,
+    var(--bg);
+}
+
+a{color:var(--text);text-decoration:none}
+a:hover{opacity:.9}
+
+.container{max-width:1100px;margin:0 auto;padding:20px}
+
+/* Navbar */
+.nav{
+  position:sticky;top:0;z-index:40;
+  background:linear-gradient(180deg, rgba(21,22,24,.9), rgba(21,22,24,.7));
+  backdrop-filter: blur(8px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.nav-inner{display:flex;align-items:center;gap:16px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.4px}
+.brand .logo{
+  width:36px;height:36px;border-radius:10px;
+  background: conic-gradient(from 0deg, #ffce54 0 25%, #f6bb42 0 26%, #e9573f 0 50%, #ffce54 0 75%, #e9573f 0 100%);
+  box-shadow:0 0 0 3px rgba(255,197,61,.15), 0 8px 20px rgba(0,0,0,.35);
+  position:relative;overflow:hidden;
+}
+.brand .logo::after{content:"";position:absolute;inset:6px;border-radius:8px;background: radial-gradient(circle at 60% 40%, rgba(0,0,0,.15), transparent 60%)}
+.brand span{font-size:1.1rem}
+.nav a.btn{margin-left:8px}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(180deg, var(--accent), #d9363e);
+  color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;
+  box-shadow:0 10px 22px var(--ring);
+  transition: transform .08s ease, box-shadow .2s ease, opacity .2s;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px var(--ring)}
+.btn.secondary{background:linear-gradient(180deg, #2b2f36, #23272e);color:#e8eaed;box-shadow: inset 0 0 0 1px rgba(255,255,255,.06)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.18)}
+
+/* Cards and grids */
+.grid{display:grid;grid-template-columns: repeat(auto-fill, minmax(260px,1fr));gap:18px;margin-top:12px}
+.card{
+  background:linear-gradient(180deg, rgba(28,30,34,.9), rgba(21,22,24,.9));
+  border:1px solid rgba(255,255,255,.06);
+  border-radius: var(--radius);
+  padding:16px;box-shadow: 0 10px 24px rgba(0,0,0,.25);
+}
+.card h3{margin:.2rem 0 .3rem;font-size:1.05rem}
+.muted{color:var(--muted)}
+.price{font-weight:700;color:#fff}
+
+/* Badges */
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin:.35rem 0}
+.badge{font-size:.72rem;padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.12);opacity:.9}
+.badge.classic{background:rgba(255,197,61,.12)}
+.badge.veggie{background:rgba(64,196,99,.12)}
+.badge.chicken{background:rgba(255,77,79,.12)}
+.badge.supreme{background:rgba(113, 128, 185, .14)}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
+th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left}
+th{background:rgba(255,255,255,.04);font-weight:600}
+
+/* Forms */
+select,input[type=number]{
+  background:#0f0f12;color:#fff;border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;padding:8px 10px;outline:none;min-height:38px
+}
+label{font-size:.86rem;color:var(--muted);margin-right:6px}
+
+/* Messages */
+.messages{margin:14px 0}
+.messages .msg{padding:10px 12px;border-radius:10px;margin-bottom:8px}
+.messages .success{background:rgba(64,196,99,.14);border:1px solid rgba(64,196,99,.35)}
+.messages .warning{background:rgba(255,197,61,.14);border:1px solid rgba(255,197,61,.35)}
+.messages .error{background:rgba(255,77,79,.14);border:1px solid rgba(255,77,79,.35)}
+
+/* Footer */
+.footer{margin-top:30px;padding:24px 0;color:var(--muted);border-top:1px solid rgba(255,255,255,.06)}
+.footer small{opacity:.85}
+
+/* Utility */
+.right{margin-left:auto}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* Headings */
+h1{font-size:1.8rem;margin:8px 0 2px}
+h3{font-size:1.1rem}
+
+/* Hero banner optional spacing under nav */
+.main{padding-top:12px}

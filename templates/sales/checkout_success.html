@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Thank you!</h1>
+<p>Your order has been placed.</p>
+<p><strong>Order Number:</strong> {{ order.external_id }}</p>
+
+{% if order.customer_first_name or order.customer_last_name or order.phone %}
+  <h3>Customer</h3>
+  <p>
+    <strong>Name:</strong> {{ order.customer_first_name }} {{ order.customer_last_name }}<br/>
+    <strong>Phone:</strong> {{ order.phone }}<br/>
+    <strong>Address:</strong> {{ order.street }}, {{ order.city }} {{ order.zip_code }}
+  </p>
+{% endif %}
+
+<h3>Items</h3>
+<table>
+  <thead>
+    <tr><th>Pizza</th><th>Size</th><th>Qty</th><th>Unit</th><th>Total</th></tr>
+  </thead>
+  <tbody>
+  {% for item in order.items.all %}
+    <tr>
+      <td>{{ item.variant.pizza.name }}</td>
+      <td>{{ item.variant.get_size_display }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>${{ item.unit_price }}</td>
+      <td>${{ item.total_price }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><a class="btn" href="/">Back to Menu</a></p>
+{% endblock %}

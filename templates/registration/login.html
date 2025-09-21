@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Sign in</h1>
+<p class="muted">Kitchen access requires an account. Use your staff credentials.</p>
+<form method="post" class="form" action="{% url 'login' %}">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ next }}" />
+  <div class="grid two">
+    <div>
+      <label for="id_username">Username</label>
+      <input id="id_username" type="text" name="username" required autofocus />
+    </div>
+    <div>
+      <label for="id_password">Password</label>
+      <input id="id_password" type="password" name="password" required />
+    </div>
+  </div>
+  {% if form.errors %}
+    <div class="messages">
+      <div class="msg error">Invalid username or password.</div>
+    </div>
+  {% endif %}
+  <button class="btn" type="submit">Sign in</button>
+</form>
+{% endblock %}

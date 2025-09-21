@@ -1,0 +1,51 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pizza Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/pizza.css' %}">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/">
+        <span class="logo" aria-hidden="true"></span>
+        <span>Pizza<span style="color:var(--accent-2)">Shop</span></span>
+      </a>
+      <div class="row">
+        <a class="btn ghost" href="/">Menu</a>
+        <a class="btn" href="/cart/">Cart</a>
+        <a class="btn secondary" href="/kitchen/">Kitchen</a>
+        {% if request.user.is_authenticated %}
+          <a class="btn secondary" href="/managers/">Managers</a>
+          <a class="btn ghost" href="/accounts/logout/">Logout</a>
+        {% else %}
+          <a class="btn ghost" href="/accounts/login/">Login</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+  <main class="main">
+    <div class="container">
+      {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="msg {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="container">
+      <small>Fresh from our oven daily · Crafted with love & basil · © {% now 'Y' %} PizzaShop</small>
+    </div>
+  </footer>
+</body>
+</html>

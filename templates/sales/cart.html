@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Your Cart</h1>
+{% if items %}
+<form method="post">
+  {% csrf_token %}
+  <table>
+    <thead>
+      <tr>
+        <th>Pizza</th>
+        <th>Size</th>
+        <th>Qty</th>
+        <th>Unit</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for it in items %}
+      <tr>
+        <td>{{ it.variant.pizza.name }}</td>
+        <td>{{ it.variant.get_size_display }}</td>
+        <td>
+          <input type="number" name="qty_{{ it.variant.id }}" value="{{ it.quantity }}" min="0" style="width:64px" />
+        </td>
+        <td>${{ it.unit_price }}</td>
+        <td>${{ it.total_price }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p><strong>Subtotal:</strong> ${{ subtotal }}</p>
+  <p>
+    <button class="btn secondary" type="submit">Update Cart</button>
+    <a class="btn right" href="{% url 'sales:checkout' %}">Checkout</a>
+  </p>
+</form>
+{% else %}
+<p>Your cart is empty. <a href="/">Browse the menu</a>.</p>
+{% endif %}
+{% endblock %}

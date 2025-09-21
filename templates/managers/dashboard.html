@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Managers Dashboard</h1>
+<p class="muted">Insights and trends for your pizza shop. Data updates automatically.</p>
+
+<div class="grid">
+  <div class="card" id="kpi">
+    <h3>Key Metrics</h3>
+    <div class="grid two" style="margin-top:.5rem">
+      <div>
+        <div class="muted">Orders Today</div>
+        <div style="font-size:1.6rem;font-weight:700" id="kpi_orders">-</div>
+      </div>
+      <div>
+        <div class="muted">Revenue Today</div>
+        <div style="font-size:1.6rem;font-weight:700" id="kpi_rev_today">-</div>
+      </div>
+      <div>
+        <div class="muted">Revenue (7d)</div>
+        <div style="font-size:1.6rem;font-weight:700" id="kpi_rev_7d">-</div>
+      </div>
+      <div>
+        <div class="muted">Avg Order (30d)</div>
+        <div style="font-size:1.6rem;font-weight:700" id="kpi_aov">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Sales (Last 30 days)</h3>
+    <canvas id="chart_timeseries" height="120"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>Status (Today)</h3>
+    <canvas id="chart_status" height="120"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>Top Pizzas (30d)</h3>
+    <canvas id="chart_top_pizzas" height="120"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>Top Categories (30d)</h3>
+    <canvas id="chart_top_categories" height="120"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const fmtMoney = v => '$' + (Number(v||0)).toFixed(2);
+
+  async function getJSON(url){
+    const res = await fetch(url, {headers:{'Accept':'application/json'}});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return await res.json();
+  }
+
+  async function loadKPIs(){
+    const data = await getJSON('{% url "managers:api_summary" %}');
+    document.getElementById('kpi_orders').textContent = data.today_order_count;
+    document.getElementById('kpi_rev_today').textContent = fmtMoney(data.today_revenue);
+    document.getElementById('kpi_rev_7d').textContent = fmtMoney(data.last7_revenue);
+    document.getElementById('kpi_aov').textContent = fmtMoney(data.avg_order_value_30d);
+  }
+
+  async function loadTimeSeries(){
+    const data = await getJSON('{% url "managers:api_sales_timeseries" %}');
+    const labels = data.points.map(p=>p.day);
+    const revenue = data.points.map(p=>p.revenue);
+    const orders = data.points.map(p=>p.orders);
+    const ctx = document.getElementById('chart_timeseries');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {label:'Revenue', data: revenue, borderColor:'#ff4d4f', backgroundColor:'rgba(255,77,79,.2)', yAxisID:'y', tension:.3},
+          {label:'Orders', data: orders, borderColor:'#40c463', backgroundColor:'rgba(64,196,99,.2)', yAxisID:'y1', tension:.3},
+        ]
+      },
+      options: {
+        responsive:true,
+        scales:{
+          y:{type:'linear', position:'left', grid:{color:'rgba(255,255,255,.06)'}},
+          y1:{type:'linear', position:'right', grid:{drawOnChartArea:false}},
+          x:{grid:{color:'rgba(255,255,255,.06)'}}
+        },
+        plugins:{legend:{labels:{color:'#e8eaed'}}}
+      }
+    });
+  }
+
+  async function loadStatus(){
+    const data = await getJSON('{% url "managers:api_status_counts" %}');
+    const labels = data.counts.map(r=>r.status.replaceAll('_',' '));
+    const counts = data.counts.map(r=>r.n);
+    new Chart(document.getElementById('chart_status'), {
+      type: 'doughnut',
+      data: {labels, datasets:[{data:counts, backgroundColor:['#ff4d4f','#ffc53d','#40c463','#7180b9']}]},
+      options:{plugins:{legend:{labels:{color:'#e8eaed'}}}}
+    });
+  }
+
+  async function loadTopPizzas(){
+    const data = await getJSON('{% url "managers:api_top_pizzas" %}');
+    const labels = data.top.map(r=>r.name);
+    const revenue = data.top.map(r=>r.revenue);
+    new Chart(document.getElementById('chart_top_pizzas'), {
+      type: 'bar',
+      data: {labels, datasets:[{label:'Revenue', data:revenue, backgroundColor:'rgba(255,77,79,.35)', borderColor:'#ff4d4f'}]},
+      options:{indexAxis:'y', plugins:{legend:{labels:{color:'#e8eaed'}}}}
+    });
+  }
+
+  async function loadTopCategories(){
+    const data = await getJSON('{% url "managers:api_top_categories" %}');
+    const labels = data.top.map(r=>r.category);
+    const revenue = data.top.map(r=>r.revenue);
+    new Chart(document.getElementById('chart_top_categories'), {
+      type: 'bar',
+      data: {labels, datasets:[{label:'Revenue', data:revenue, backgroundColor:'rgba(64,196,99,.35)', borderColor:'#40c463'}]},
+      options:{plugins:{legend:{labels:{color:'#e8eaed'}}}}
+    });
+  }
+
+  async function init(){
+    try{
+      await loadKPIs();
+      await loadTimeSeries();
+      await loadStatus();
+      await loadTopPizzas();
+      await loadTopCategories();
+    }catch(e){ console.error(e); }
+  }
+  init();
+</script>
+{% endblock %}

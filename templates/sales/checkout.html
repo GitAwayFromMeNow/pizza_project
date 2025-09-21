@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Checkout</h1>
+{% if items %}
+  <h3>Order Summary</h3>
+  <table>
+    <thead>
+      <tr><th>Pizza</th><th>Size</th><th>Qty</th><th>Unit</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+    {% for v, qty, unit, total in items %}
+      <tr>
+        <td>{{ v.pizza.name }}</td>
+        <td>{{ v.get_size_display }}</td>
+        <td>{{ qty }}</td>
+        <td>${{ unit }}</td>
+        <td>${{ total }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p><strong>Subtotal:</strong> ${{ subtotal }}</p>
+
+  <h3>Customer Information</h3>
+  <form method="post" class="form">
+    {% csrf_token %}
+    <div class="grid two">
+      <div>
+        <label for="first_name">First name</label>
+        <input id="first_name" name="first_name" type="text" value="{{ form.first_name }}" required />
+      </div>
+      <div>
+        <label for="last_name">Last name</label>
+        <input id="last_name" name="last_name" type="text" value="{{ form.last_name }}" required />
+      </div>
+      <div>
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" value="{{ form.phone }}" required />
+      </div>
+      <div>
+        <label for="street">Street</label>
+        <input id="street" name="street" type="text" value="{{ form.street }}" required />
+      </div>
+      <div>
+        <label for="city">City</label>
+        <input id="city" name="city" type="text" value="{{ form.city }}" required />
+      </div>
+      <div>
+        <label for="zip">ZIP</label>
+        <input id="zip" name="zip" type="text" value="{{ form.zip_code }}" required />
+      </div>
+    </div>
+
+    <button class="btn" type="submit">Place Order</button>
+    <a class="btn secondary" href="{% url 'sales:cart' %}">Back to Cart</a>
+  </form>
+{% else %}
+<p>Your cart is empty. <a href="/">Browse the menu</a>.</p>
+{% endif %}
+{% endblock %}
