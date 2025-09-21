@@ -23,8 +23,9 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("external_id", "ordered_at")
-    search_fields = ("external_id",)
+    list_display = ("external_id", "ordered_at", "status", "customer_first_name", "customer_last_name", "phone")
+    list_filter = ("status",)
+    search_fields = ("external_id", "customer_first_name", "customer_last_name", "phone")
     date_hierarchy = "ordered_at"
     inlines = [OrderItemInline]
 
