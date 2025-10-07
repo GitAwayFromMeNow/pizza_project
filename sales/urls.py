@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 app_name = "sales"
@@ -9,4 +9,5 @@ urlpatterns = [
     path("cart/", views.view_cart, name="cart"),
     path("checkout/", views.checkout, name="checkout"),
     path("success/<int:order_id>/", views.checkout_success, name="success"),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
